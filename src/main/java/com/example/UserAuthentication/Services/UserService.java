@@ -3,7 +3,6 @@ package com.example.UserAuthentication.Services;
 import com.example.UserAuthentication.Entity.User;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -20,23 +19,20 @@ public class UserService {
         return user;
     }
 
-    public User getUser(String userId) {
+    public User getUser(String userId, User user) {
 
-        User getUser =  users.stream()
-               .filter(user -> user.getId().equals(userId))
-               .findFirst()
-               .orElse(null);
+        User getUser = findUser(userId);
 
         if (getUser != null){
-            return getUser;
-        }
-
-       throw new IllegalArgumentException("User with id: " + userId + " not found");
+            if (getUser.getPassword().equals(user.getPassword())){
+                return getUser;
+            } throw new IllegalArgumentException("Wrong password, user with id: " + userId);
+        } throw new IllegalArgumentException("User with id: " + userId + " not found");
     }
 
     public User deleteUser(String userId) {
 
-        User userDell = getUser(userId);
+        User userDell = findUser(userId);
 
         if (userDell != null) {
             users.remove(userDell);
@@ -49,7 +45,7 @@ public class UserService {
 
     public User updateUser(String userId, User user) {
 
-        User userUpdate = getUser(userId);
+        User userUpdate = findUser(userId);
 
         if (userUpdate != null) {
 
@@ -62,6 +58,15 @@ public class UserService {
             return userUpdate;
         }
         throw new IllegalArgumentException("User with id " + userId + " - not found");
+    }
+
+    private User findUser(String userId){
+
+        return users.stream()
+                .filter(user -> user.getId().equals(userId))
+                .findFirst()
+                .orElse(null);
+
     }
 
 }
