@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,14 +21,9 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @GetMapping("/users/{userId}/{password}")
-    public User getUser(@PathVariable String userId, @PathVariable String password) {
-            return userService.getUser(userId, password);
-    }
-
-    @GetMapping("/allUsers")
-    public Map<String, User> getAllUsers() {
-        return userService.getAllUsers();
+    @GetMapping("/users/{userId}")
+    public User getUser(@PathVariable String userId) {
+            return userService.getUser(userId);
     }
 
     @DeleteMapping("/users/{userId}")

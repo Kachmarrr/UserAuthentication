@@ -3,63 +3,65 @@ package com.example.UserAuthentication.Services;
 import com.example.UserAuthentication.Entity.User;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class UserService {
 
-    //<String = usedId
-    private Map<String, User> users = new HashMap<>();
+    private List<User> users = FileReaderWriter.readCSVFile();
 
     public User createUser(User user) {
 
         user.setId(UUID.randomUUID().toString());
-        users.put(user.getId(), user);
+        users.add(user);
+        FileReaderWriter.writeToCSVFile(users);
 
         return user;
     }
 
-    public Map<String, User> getAllUsers() {
-        return users;
-    }
+    public User getUser(String userId) {
 
-    public User getUser(String id, String password) {
+        User getUser =  users.stream()
+               .filter(user -> user.getId().equals(userId))
+               .findFirst()
+               .orElse(null);
 
-        if (users.containsKey(id)){
-            if (users.get(id).getPassword().equals(password)){
-                return users.get(id);
-            }
-            throw new IllegalArgumentException("User with id: " + id + " - password is not correct.");
-        }
-        throw new IllegalArgumentException("User with id: " + id + " - not found");
-    }
-
-    public User deleteUser(String id) {
-
-        if (users.containsKey(id)){
-            return users.remove(id);
-        }
-        throw new IllegalArgumentException("User with id " + id + " - not found");
-    }
-
-    public User updateUser(String id, User user) {
-
-        if (!users.containsKey(id)) {
-            throw new IllegalArgumentException("User with id " + id + " - not found");
+        if (getUser != null){
+            return getUser;
         }
 
-        User updateUser = users.get(id);
-
-            if (users.containsKey(id)) {
-
-                updateUser.setUserName(user.getUserName());
-                updateUser.setPassword(user.getPassword());
-                updateUser.setBalance(user.getBalance());
-
-            }
-
-        return updateUser;
+       throw new IllegalArgumentException("User with id: " + userId + " not found");
     }
+
+    public User deleteUser(String userId) {
+
+        User userDell = getUser(userId);
+
+        if (userDell != null) {
+            users.remove(userDell);
+            FileReaderWriter.writeToCSVFile(users);
+            return userDell;
+        }
+        throw new IllegalArgumentException("User with id " + userId + " - not found");
+
+    }
+
+    public User updateUser(String userId, User user) {
+
+        User userUpdate = getUser(userId);
+
+        if (userUpdate != null) {
+
+            userUpdate.setUserName(user.getUserName());
+            userUpdate.setPassword(user.getPassword());
+            userUpdate.setBalance(user.getBalance());
+
+            FileReaderWriter.writeToCSVFile(users);
+
+            return userUpdate;
+        }
+        throw new IllegalArgumentException("User with id " + userId + " - not found");
+    }
+
 }
